@@ -1,2 +1,3 @@
-# arch-awesome
-Arch Linux Awesome WM setup &amp; configuration
+# Arch Awesome
+
+Arch Linux Awesome WM setup & configuration
