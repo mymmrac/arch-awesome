@@ -28,13 +28,11 @@ $ timedatectl set-ntp true
 ## Step 3: Update mirror list
 
 ```shell
-$ reflector -c Ukraine -a 6 --sort rate --save /etc/pacman.d/mirrorlist
+$ reflector --country Ukraine,USA -a 6 --sort rate --save /etc/pacman.d/mirrorlist
 $ pacman -Syy
 ```
 
 ## Step 4: Partition the disk
-
-TODO: Name partitions
 
 ```shell
 $ lsblk
@@ -49,6 +47,9 @@ $>
 $> 
 $> +300M
 $> ef00
+$> c
+$> 1
+$> Alpha
 
 # Swap
 $> n
@@ -56,6 +57,9 @@ $>
 $> 
 $> +8G
 $> 8200
+$> c
+$> 2
+$> Delta
 
 # Root
 $> n
@@ -63,6 +67,9 @@ $>
 $> 
 $> 
 $> 
+$> c
+$> 3
+$> Xi
 
 $> w
 ```
@@ -143,6 +150,8 @@ $ micro /etc/locale.conf
 # LC_PAPER=uk_UA.UTF-8
 # LC_TELEPHONE=uk_UA.UTF-8
 # LC_TIME=uk_UA.UTF-8
+
+localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
 ```
 
 ## Step 11: Set hostname
@@ -165,14 +174,12 @@ $ passwd
 
 ## Step 13: Install packages
 
-TODO: Check what packages are needed
-
 ```shell
-$ pacman -S \
+$ pacman --needed -S \
   grub efibootmgr \
   networkmanager network-manager-applet \
-  dialog \
-  wda_supplicant \
+  dialog ntp \
+  wpa_supplicant \
   mtools dosfstools \
   git \
   reflector \
@@ -180,14 +187,15 @@ $ pacman -S \
   bluez bluez-utils \
   cups hplib \
   xdg-utils xdg-user-dirs \
-  pipewire pipewire-pulse pipewire-alsa \
-  inetutils \
-  base-devel linux-headers \
+  pipewire pipewire-pulse pipewire-alsa alsa-utils \
+  inetutils pkgconf \
+  base-devel linux-headers sudo \
   bash-completion \
-  go
+  go \
+  btrfs-progs
 ```
 
-## Step 14: Add btrfs module
+## Step 14: Add modules
 
 ```shell
 $ micro /etc/mkinitcpio.conf
@@ -283,17 +291,8 @@ $ rm -r yay
 $ yay -S snap-pac-grub snapper-gui
 ```
 
-## Step 22: Install all packages
+## Step 22: Reboot
 
 ```shell
-$ sudo pacman -S \
-  mesa xf86-video-intel nvidia nvidia-utils nvidia-settings \
-  xorg awesome
-  ....
-```
-
-## Step 23: Enable services
-
-```shell
-....
+$ reboot
 ```

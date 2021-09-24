@@ -151,3 +151,11 @@ sudo micro /etc/hosts
 127.0.0.1        localhost
 ::1              localhost
 127.0.1.1        mymmrac-pc.localdomain        mymmrac-pc
+
+# ==================================================================================================================== #
+# .bashrc config for fish
+
+if [[ $(ps --no-header --pid=$PPID --format=cmd) != "fish" && -z ${BASH_EXECUTION_STRING} ]]
+then
+	exec fish
+fi
