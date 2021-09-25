@@ -202,7 +202,7 @@ $ pacman --needed -S \
   dialog ntp \
   wpa_supplicant \
   mtools dosfstools \
-  git \
+  git openssh \
   reflector \
   snapper rsync \
   bluez bluez-utils \
@@ -247,6 +247,7 @@ $ grub-mkconfig -o /boot/grub/grub.cfg
 $ systemctl enable NetworkManager
 $ systemctl enable bluetooth
 $ systemctl enable cups
+$ systemctl enable sshd
 ```
 
 ## Step 17: Create user
