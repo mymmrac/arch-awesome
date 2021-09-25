@@ -86,6 +86,10 @@ $ sudo micro /etc/systemd/system/suspend\@.service
 # 
 # [Install]
 # WantedBy=sleep.target
+
+$ git clone git@github.com:mymmrac/arch-awesome.git
+$ cd arch-awesome/
+$ cp -ri configs/* .config/
 ```
 
 ## Step 5: Other configs
