@@ -78,7 +78,7 @@ $ gdisk /dev/sda
 ```shell
 $ mkfs.fat -F32 /dev/sda1
 
-$ mkspaw /dev/sda2
+$ mkswap /dev/sda2
 $ swapon /dev/sda2
 
 $ mkfs.btrfs /dev/sda3
