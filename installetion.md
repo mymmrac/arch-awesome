@@ -48,7 +48,6 @@ $>
 $> +300M
 $> ef00
 $> c
-$> 1
 $> Alpha
 
 # Swap
@@ -132,7 +131,7 @@ $ arch-chroot /mnt
 
 ```shell
 $ ln -sf /usr/share/zoneinfo/Europe/Kiev /etc/localtime
-$ hwclock -systohc
+$ hwclock --systohc
 
 $ micro /etc/locale.gen
 # Uncomment en_US.UTF-8 UTF-8 and uk_UA.UTF-8 UTF-8
@@ -151,7 +150,7 @@ $ micro /etc/locale.conf
 # LC_TELEPHONE=uk_UA.UTF-8
 # LC_TIME=uk_UA.UTF-8
 
-localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
+$ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
 ```
 
 ## Step 11: Set hostname
@@ -183,16 +182,17 @@ $ pacman --needed -S \
   mtools dosfstools \
   git \
   reflector \
-  snapper rsunc \
+  snapper rsync \
   bluez bluez-utils \
-  cups hplib \
+  cups hplip \
   xdg-utils xdg-user-dirs \
   pipewire pipewire-pulse pipewire-alsa alsa-utils \
   inetutils pkgconf \
   base-devel linux-headers sudo \
   bash-completion \
   go \
-  btrfs-progs
+  btrfs-progs \
+  nvidia
 ```
 
 ## Step 14: Add modules
@@ -222,7 +222,7 @@ $ systemctl enable cups
 ## Step 17: Create user
 
 ```shell
-$ adduser -mG wheel mymmrac
+$ useradd -mG wheel mymmrac
 $ passwd mymmrac
 
 $ EDITOR=micro visudo
@@ -248,12 +248,20 @@ $ sudo btrfs su del /.snapshots
 $ sudo mkdir /.snapshots
 $ sudo mount -a
 
-$ sudo chmod 750 ./snapshots
+$ sudo chmod 750 /.snapshots
 $ sudo chown :mymmrac /.snapshots
 
 $ sudo micro /etc/snapper/configs/root
 # ALLOW_USERS="" => ALLOW_USERS="mymmrac"
 # TIMELINE_LIMIT_* => HOURLY="5" DAILY="7" WEEKLY="0" MONTHLY="0" YEARLY="0"
+
+$ sudo snapper -c home create-config /home
+$ sudo micro /etc/snapper/configs/home
+# ALLOW_USERS="" => ALLOW_USERS="mymmrac"
+# TIMELINE_LIMIT_* => HOURLY="2" DAILY="7" WEEKLY="2" MONTHLY="0" YEARLY="0"
+
+$ sudo chmod 750 /home/.snapshots
+$ sudo chown :mymmrac /home/.snapshots
 
 $ sudo systemctl enable --now snapper-timeline.timer
 $ sudo systemctl enable --now snapper-cleanup.timer
@@ -267,12 +275,12 @@ $ sudo micro /etc/pacman.d/hooks/50-bootbackup.hook
 # Operation = Remove
 # Type = Path
 # Target = boot/*
-#
+# 
 # [Action]
-# Depends = rsunc
+# Depends = rsync
 # Description = Backing up /boot...
 # When = PreTransaction
-# Exec = /urs/bin/rsync -a --delete /boot /.bootbackup 
+# Exec = /usr/bin/rsync -a --delete /boot /.bootbackup
 ```
 
 ## Step 20: Install yay
@@ -282,7 +290,7 @@ $ git clone https://aur.archlinux.org/yay
 $ cd yay
 $ makepkg -si
 $ cd ..
-$ rm -r yay
+$ rm -rf yay
 ```
 
 ## Step 21: Install snap-pac-grub & snapper-gui
@@ -294,5 +302,5 @@ $ yay -S snap-pac-grub snapper-gui
 ## Step 22: Reboot
 
 ```shell
-$ reboot
+$ sudo reboot
 ```

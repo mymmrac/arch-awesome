@@ -3,20 +3,28 @@
 ## Step 1: Install packages
 
 ```shell
+$ sudo micro /etc/pacman.conf
+# Uncomment:
+# [multilib]
+# Include = /etc/pacman.d/mirrorlist
+
+$ sudo pacman -Syyu
+
 $ sudo pacman --needed -S \
   mesa xf86-video-intel nvidia nvidia-utils nvidia-settings \
   xorg-server xorg-xrandr xorg-xkill xorg-xinit xorg-xhost \
-  terminus-font libinput unclutter man-db make m4 libvncserver libtool libpulse gettext gcc autoconf automake file fakeroot \
+  terminus-font ttf-dejavu noto-fonts ttf-liberation ttf-ibm-plex \
+  libinput unclutter man-db make m4 libvncserver libtool libpulse gettext gcc autoconf automake file fakeroot \
   acpi acpid acpi_call\
   awesome arc-gtk-theme polkit-gnome picom lxappearance-gtk3 \
   lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings \
   maim openssh wget xsel zip unzip gzip which tailscale sed playerctl patch light grep gawk findutils cpio compsize bison binutils \
   neofetch lolcat htop figlet cowsay cmatrix bottom dust jq bat \
   grub-customizer gpicview vlc transmission-gtk telegram-desktop steam remmina qalculate-gtk obs-studio libreoffice-still jupyterlab firefox flameshot discord evince \
-  alacritty xterm starship rofi \
+  alacritty xterm starship rofi fish \
   virtualbox virtualbox-host-modules-arch \
   thunar thunar-archive-plugin tumbler file-roller \
-  python-pip nodejs-lts-fermium jdk11-openjdk \
+  python python-pip nodejs-lts-fermium jdk11-openjdk \
   docker docker-compose \
   pipewire-media-session
   
@@ -47,4 +55,57 @@ $ sudo micro /etc/systemd/logind.conf
 # HandleLidSwitch=suspend
 # IdleAction=suspend
 # IdleActionSec=15min
+```
+
+## Step 4: Copy configs
+
+```shell
+$ micro .bashrc
+# if [[ $(ps --no-header --pid=$PPID --format=cmd) != "fish" && -z ${BASH_EXECUTION_STRING} ]]
+# then
+# 	 exec fish
+# fi
+#
+# alias la='ls -a'
+# alias ftime='date +"%d.%m.%y    %T" | figlet -tk | lolcat'
+#
+# eval "$(starship init bash)"
+# ftime
+
+$ sudo micro /etc/systemd/system/suspend\@.service
+# [Unit]
+# Description=User suspend on LightDM lock screen
+# Before=sleep.target
+# 
+# [Service]
+# User=%I
+# Environment=DISPLAY=:0
+# Environment=XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0
+# ExecStart=/usr/bin/dm-tool lock
+# ExecStartPost=/usr/bin/sleep 1
+# 
+# [Install]
+# WantedBy=sleep.target
+```
+
+## Step 5: Other configs
+
+```shell
+$ sudo chmod +s /usr/bin/light
+
+$ fish_update_completions
+$ curl -L https://get.oh-my.fish | fish
+```
+
+## Step 6: Enable services
+
+```shell
+$ sudo systemctl enable lightdm
+$ sudo systemctl enable suspend@mymmrac
+```
+
+## Step 7: Reboot
+
+```shell
+$ reboot
 ```
