@@ -4,10 +4,16 @@
 
 ```shell
 $ sudo micro /etc/pacman.conf
-# Uncomment:
-# [multilib]
-# Include = /etc/pacman.d/mirrorlist
+```
 
+Uncomment:
+
+```
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+```
+
+```shell
 $ sudo pacman -Syyu
 
 $ sudo pacman --needed -S \
@@ -38,55 +44,79 @@ $ yay -S \
 
 ```shell
 $ sudo micro /etc/X11/xorg.conf.d/30-touchpad.conf
-# Section "InputClass"
-# Identifier "touchpad"nemo
-# Driver "libinput"
-#   MatchIsTouchpad "on"
-#   Option "Tapping" "on"
-#   Option "NaturalScrolling" "off"
-#   Option "ClickMethod" "clickfinger"
-# EndSection
+```
+
+Insert:
+
+```
+Section "InputClass"
+    Identifier "touchpad"nemo
+    Driver "libinput"
+    MatchIsTouchpad "on"
+    Option "Tapping" "on"
+    Option "NaturalScrolling" "off"
+    Option "ClickMethod" "clickfinger"
+EndSection
 ```
 
 ## Step 3: Configure locking
 
 ```shell
 $ sudo micro /etc/systemd/logind.conf
-# HandleLidSwitch=suspend
-# IdleAction=suspend
-# IdleActionSec=15min
+```
+
+Change following:
+
+```
+HandleLidSwitch=suspend
+IdleAction=suspend
+IdleActionSec=15min
 ```
 
 ## Step 4: Copy configs
 
 ```shell
 $ micro .bashrc
-# if [[ $(ps --no-header --pid=$PPID --format=cmd) != "fish" && -z ${BASH_EXECUTION_STRING} ]]
-# then
-# 	 exec fish
-# fi
-#
-# alias la='ls -a'
-# alias ftime='date +"%d.%m.%y    %T" | figlet -tk | lolcat'
-#
-# eval "$(starship init bash)"
-# ftime
+```
 
+Append:
+
+```shell
+if [[ $(ps --no-header --pid=$PPID --format=cmd) != "fish" && -z ${BASH_EXECUTION_STRING} ]]
+then
+  exec fish
+fi
+
+alias la='ls -a'
+alias ftime='date +"%d.%m.%y    %T" | figlet -tk | lolcat'
+
+eval "$(starship init bash)"
+ftime
+```
+
+```shell
 $ sudo micro /etc/systemd/system/suspend\@.service
-# [Unit]
-# Description=User suspend on LightDM lock screen
-# Before=sleep.target
-# 
-# [Service]
-# User=%I
-# Environment=DISPLAY=:0
-# Environment=XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0
-# ExecStart=/usr/bin/dm-tool lock
-# ExecStartPost=/usr/bin/sleep 1
-# 
-# [Install]
-# WantedBy=sleep.target
+```
 
+Insert:
+
+```
+[Unit]
+Description=User suspend on LightDM lock screen
+Before=sleep.target
+
+[Service]
+User=%I
+Environment=DISPLAY=:0
+Environment=XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0
+ExecStart=/usr/bin/dm-tool lock
+ExecStartPost=/usr/bin/sleep 1
+
+[Install]
+WantedBy=sleep.target
+```
+
+```shell
 $ git clone git@github.com:mymmrac/arch-awesome.git
 $ cd arch-awesome/
 $ cp -ri configs/* .config/

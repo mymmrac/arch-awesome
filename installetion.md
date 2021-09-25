@@ -7,8 +7,8 @@ Wi-Fi method
 ```shell
 $ iwctl
 
-$> station wlan0 connect "kernel panic"
-$> exit
+> station wlan0 connect "kernel panic"
+> exit
 ```
 
 To check if all works:
@@ -39,38 +39,38 @@ $ lsblk
 
 $ gdisk /dev/sda
 
-$> o
+> o
 
 # EFI Boot
-$> n
-$> 
-$> 
-$> +300M
-$> ef00
-$> c
-$> Alpha
+> n
+> 
+> 
+> +300M
+> ef00
+> c
+> Alpha
 
 # Swap
-$> n
-$> 
-$> 
-$> +8G
-$> 8200
-$> c
-$> 2
-$> Delta
+> n
+> 
+> 
+> +8G
+> 8200
+> c
+> 2
+> Delta
 
 # Root
-$> n
-$> 
-$> 
-$> 
-$> 
-$> c
-$> 3
-$> Xi
+> n
+> 
+> 
+> 
+> 
+> c
+> 3
+> Xi
 
-$> w
+> w
 ```
 
 ## Step 5: Make filesystems
@@ -134,22 +134,32 @@ $ ln -sf /usr/share/zoneinfo/Europe/Kiev /etc/localtime
 $ hwclock --systohc
 
 $ micro /etc/locale.gen
-# Uncomment en_US.UTF-8 UTF-8 and uk_UA.UTF-8 UTF-8
+```
 
+Uncomment `en_US.UTF-8 UTF-8` and `uk_UA.UTF-8 UTF-8`
+
+```shell
 $ locale-gen
 
 $ micro /etc/locale.conf
-# LANG=en_US.UTF-8
-# LC_ADDRESS=uk_UA.UTF-8
-# LC_IDENTIFICATION=uk_UA.UTF-8
-# LC_MONETARY=uk_UA.UTF-8
-# LC_MEASUREMENT=uk_UA.UTF-8
-# LC_NAME=uk_UA.UTF-8
-# LC_NUMERIC=uk_UA.UTF-8
-# LC_PAPER=uk_UA.UTF-8
-# LC_TELEPHONE=uk_UA.UTF-8
-# LC_TIME=uk_UA.UTF-8
+```
 
+Insert:
+
+```
+LANG=en_US.UTF-8
+LC_ADDRESS=uk_UA.UTF-8
+LC_IDENTIFICATION=uk_UA.UTF-8
+LC_MONETARY=uk_UA.UTF-8
+LC_MEASUREMENT=uk_UA.UTF-8
+LC_NAME=uk_UA.UTF-8
+LC_NUMERIC=uk_UA.UTF-8
+LC_PAPER=uk_UA.UTF-8
+LC_TELEPHONE=uk_UA.UTF-8
+LC_TIME=uk_UA.UTF-8
+```
+
+```shell
 $ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
 ```
 
@@ -157,12 +167,24 @@ $ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
 
 ```shell
 $ micro /etc/hostname
-# mymmrac-pc
+```
 
+Insert:
+
+```
+mymmrac-pc
+```
+
+```shell
 $ micro /etc/hosts
-# 127.0.0.1        localhost
-# ::1              localhost
-# 127.0.1.1        mymmrac-pc.localdomain        mymmrac-pc
+```
+
+Insert:
+
+```
+127.0.0.1 localhost
+::1       localhost
+127.0.1.1 mymmrac-pc.localdomain        mymmrac-pc
 ```
 
 ## Step 12: Set password
@@ -199,9 +221,16 @@ $ pacman --needed -S \
 
 ```shell
 $ micro /etc/mkinitcpio.conf
-# MODULES=() => MODULES=(btrfs i915 nvidia)
-# HOOKS=(... fsck) => HOOKS=(...)
+```
 
+Add and remove following:
+
+```
+MODULES=() => MODULES=(btrfs i915 nvidia)
+HOOKS=(... fsck) => HOOKS=(...)
+```
+
+```shell
 $ mkinitcpio -p linux
 ```
 
@@ -219,6 +248,7 @@ $ systemctl enable NetworkManager
 $ systemctl enable bluetooth
 $ systemctl enable cups
 ```
+
 ## Step 17: Create user
 
 ```shell
@@ -226,8 +256,10 @@ $ useradd -mG wheel mymmrac
 $ passwd mymmrac
 
 $ EDITOR=micro visudo
-# Uncomment %wheel ALL=(ALL) ALL
 ```
+
+Uncomment `%wheel ALL=(ALL) ALL`
+
 ## Step 18: Exit & reboot
 
 ```shell
@@ -252,14 +284,28 @@ $ sudo chmod 750 /.snapshots
 $ sudo chown :mymmrac /.snapshots
 
 $ sudo micro /etc/snapper/configs/root
-# ALLOW_USERS="" => ALLOW_USERS="mymmrac"
-# TIMELINE_LIMIT_* => HOURLY="5" DAILY="7" WEEKLY="0" MONTHLY="0" YEARLY="0"
+```
 
+Change following:
+
+```
+ALLOW_USERS="" => ALLOW_USERS="mymmrac"
+TIMELINE_LIMIT_* => HOURLY="5" DAILY="7" WEEKLY="0" MONTHLY="0" YEARLY="0"
+```
+
+```shell
 $ sudo snapper -c home create-config /home
 $ sudo micro /etc/snapper/configs/home
-# ALLOW_USERS="" => ALLOW_USERS="mymmrac"
-# TIMELINE_LIMIT_* => HOURLY="2" DAILY="7" WEEKLY="2" MONTHLY="0" YEARLY="0"
+```
 
+Change following:
+
+```
+ALLOW_USERS="" => ALLOW_USERS="mymmrac"
+TIMELINE_LIMIT_* => HOURLY="2" DAILY="7" WEEKLY="2" MONTHLY="0" YEARLY="0"
+```
+
+```shell
 $ sudo chmod 750 /home/.snapshots
 $ sudo chown :mymmrac /home/.snapshots
 
@@ -269,18 +315,23 @@ $ sudo systemctl enable --now snapper-cleanup.timer
 $ sudo mkdir /etc/pacman.d/hooks
 
 $ sudo micro /etc/pacman.d/hooks/50-bootbackup.hook
-# [Trigger]
-# Operation = Upgrade
-# Operation = Install
-# Operation = Remove
-# Type = Path
-# Target = boot/*
-# 
-# [Action]
-# Depends = rsync
-# Description = Backing up /boot...
-# When = PreTransaction
-# Exec = /usr/bin/rsync -a --delete /boot /.bootbackup
+```
+
+Insert:
+
+```
+[Trigger]
+Operation=Upgrade
+Operation=Install
+Operation=Remove
+Type=Path
+Target=boot/*
+
+[Action]
+Depends=rsync
+Description=Backing up /boot...
+When=PreTransaction
+Exec=/usr/bin/rsync -a --delete /boot /.bootbackup
 ```
 
 ## Step 20: Install yay
