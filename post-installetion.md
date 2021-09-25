@@ -119,7 +119,8 @@ WantedBy=sleep.target
 ```shell
 $ git clone git@github.com:mymmrac/arch-awesome.git
 $ cd arch-awesome/
-$ cp -ri configs/* .config/
+$ cp -ri configs/* ~/.config/
+$ rm -rf arch-awesome/
 ```
 
 ## Step 5: Other configs
