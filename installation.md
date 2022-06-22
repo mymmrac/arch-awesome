@@ -1,15 +1,19 @@
 # Installation of Arch Linux
 
-## Step 1: Connect to network
+## Connect to network
 
 Wi-Fi method
 
 ```shell
 $ iwctl
 
-> station wlan0 connect "kernel panic"
+> adapter list
+> station <adapter-name> connect "<wifi-name>"
 > exit
 ```
+
+> `<adapter-name>`: wlan0
+> `<wifi-name>`: kernel panic
 
 To check if all works:
 
@@ -19,25 +23,35 @@ $ ip a
 $ ping -c 3 8.8.8.8
 ```
 
-## Step 2: Configure time
+## Enable SSH
+
+```shell
+$ passwd
+
+$ systemctl start sshd
+```
+
+## Configure time
 
 ```shell
 $ timedatectl set-ntp true
 ```
 
-## Step 3: Update mirror list
+## Update mirror list
 
 ```shell
-$ reflector --country Ukraine,USA -a 6 --sort rate --save /etc/pacman.d/mirrorlist
+$ reflector --country <country-list> -a 6 --sort rate --save /etc/pacman.d/mirrorlist
 $ pacman -Syy
 ```
 
-## Step 4: Partition the disk
+> `<country-list>`: Ukraine,USA
+
+## Partition the disk
 
 ```shell
 $ lsblk
 
-$ gdisk /dev/sda
+$ gdisk <disk-name>
 
 > o
 
@@ -45,7 +59,7 @@ $ gdisk /dev/sda
 > n
 > 
 > 
-> +300M
+> +512M
 > ef00
 > c
 > Alpha
@@ -54,7 +68,7 @@ $ gdisk /dev/sda
 > n
 > 
 > 
-> +8G
+> +<swap-size>G
 > 8200
 > c
 > 2
@@ -73,21 +87,26 @@ $ gdisk /dev/sda
 > w
 ```
 
-## Step 5: Make filesystems
+> `<disk-name>`: /dev/sda
+> `<swap-size>`: 16
+
+## Make filesystems
 
 ```shell
-$ mkfs.fat -F32 /dev/sda1
+$ mkfs.fat -F32 <disk-name>1
 
-$ mkswap /dev/sda2
-$ swapon /dev/sda2
+$ mkswap <disk-name>2
+$ swapon <disk-name>2
 
-$ mkfs.btrfs /dev/sda3
+$ mkfs.btrfs <disk-name>3
 ```
 
-## Step 6: Mount partitions & make sub-volumes
+> `<disk-name>`: /dev/sda
+
+## Mount partitions & make sub-volumes
 
 ```shell
-$ mount /dev/sda3 /mnt
+$ mount <disk-name>3 /mnt
 
 $ btrfs su cr /mnt/@
 $ btrfs su cr /mnt/@home
@@ -96,24 +115,26 @@ $ btrfs su cr /mnt/@var_log
 
 $ umount /mnt
 
-$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@ /dev/sda3 /mnt
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@ <disk-name>3 /mnt
 
 $ mkdir -p /mnt/{boot,home,.snapshots,var/log}
 
-$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home /dev/sda3 /mnt/home
-$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots /dev/sda3 /mnt/.snapshots
-$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@var_log /dev/sda3 /mnt/var/log
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home <disk-name>3 /mnt/home
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots <disk-name>3 /mnt/.snapshots
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@var_log <disk-name>3 /mnt/var/log
 
-$ mount /dev/sda1 /mnt/boot
+$ mount <disk-name>1 /mnt/boot
 ```
 
-## Step 7: Install base packages
+> `<disk-name>`: /dev/sda
+
+## Install base packages
 
 ```shell
-$ pacstrap /mnt base linux linux-firmware intel-ucode micro
+$ pacstrap /mnt base linux linux-firmware intel-ucode nvim
 ```
 
-## Step 8: Generate fstab
+## Generate fstab
 
 ```shell
 $ genfstab -U /mnt >> /mnt/etc/fstab
@@ -121,27 +142,29 @@ $ genfstab -U /mnt >> /mnt/etc/fstab
 $ cat /mnt/etc/fstab
 ```
 
-## Step 9: Go inside installation
+## Go inside installation
 
 ```shell
 $ arch-chroot /mnt
 ```
 
-## Step 10: Time zone & localization
+## Time zone & localization
 
 ```shell
-$ ln -sf /usr/share/zoneinfo/Europe/Kiev /etc/localtime
+$ ln -sf /usr/share/zoneinfo/<time-zone> /etc/localtime
 $ hwclock --systohc
 
-$ micro /etc/locale.gen
+$ nvim /etc/locale.gen
 ```
+
+> `<time-zone>`: Europe/Kiev
 
 Uncomment `en_US.UTF-8 UTF-8` and `uk_UA.UTF-8 UTF-8`
 
 ```shell
 $ locale-gen
 
-$ micro /etc/locale.conf
+$ nvim /etc/locale.conf
 ```
 
 Insert:
@@ -163,10 +186,10 @@ LC_TIME=uk_UA.UTF-8
 $ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
 ```
 
-## Step 11: Set hostname
+## Set hostname
 
 ```shell
-$ micro /etc/hostname
+$ nvim /etc/hostname
 ```
 
 Insert:
@@ -176,7 +199,7 @@ mymmrac-pc
 ```
 
 ```shell
-$ micro /etc/hosts
+$ nvim /etc/hosts
 ```
 
 Insert:
@@ -187,13 +210,13 @@ Insert:
 127.0.1.1 mymmrac-pc.localdomain        mymmrac-pc
 ```
 
-## Step 12: Set password
+## Set password
 
 ```shell
 $ passwd
 ```
 
-## Step 13: Install packages
+## Install packages
 
 ```shell
 $ pacman --needed -S \
@@ -212,15 +235,15 @@ $ pacman --needed -S \
   inetutils pkgconf \
   base-devel linux-headers sudo \
   bash-completion \
-  go \
+  go lua \
   btrfs-progs \
   nvidia
 ```
 
-## Step 14: Add modules
+## Add modules
 
 ```shell
-$ micro /etc/mkinitcpio.conf
+$ nvim /etc/mkinitcpio.conf
 ```
 
 Add and remove following:
@@ -234,14 +257,14 @@ HOOKS=(... fsck) => HOOKS=(...)
 $ mkinitcpio -p linux
 ```
 
-## Step 15: Grub bootloader
+## Grub bootloader
 
 ```shell
 $ grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 $ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-## Step 16: Enable services
+## Enable services
 
 ```shell
 $ systemctl enable NetworkManager
@@ -250,18 +273,18 @@ $ systemctl enable cups
 $ systemctl enable sshd
 ```
 
-## Step 17: Create user
+## Create user
 
 ```shell
 $ useradd -mG wheel mymmrac
 $ passwd mymmrac
 
-$ EDITOR=micro visudo
+$ EDITOR=nvim visudo
 ```
 
 Uncomment `%wheel ALL=(ALL) ALL`
 
-## Step 18: Exit & reboot
+## Exit & reboot
 
 ```shell
 $ exit
@@ -269,7 +292,7 @@ $ umount -a
 $ reboot
 ```
 
-## Step 19: Configure snapper
+## Configure snapper
 
 ```shell
 $ sudo umount /.snapshots
@@ -284,7 +307,7 @@ $ sudo mount -a
 $ sudo chmod 750 /.snapshots
 $ sudo chown :mymmrac /.snapshots
 
-$ sudo micro /etc/snapper/configs/root
+$ sudo nvim /etc/snapper/configs/root
 ```
 
 Change following:
@@ -296,7 +319,7 @@ TIMELINE_LIMIT_* => HOURLY="5" DAILY="7" WEEKLY="0" MONTHLY="0" YEARLY="0"
 
 ```shell
 $ sudo snapper -c home create-config /home
-$ sudo micro /etc/snapper/configs/home
+$ sudo nvim /etc/snapper/configs/home
 ```
 
 Change following:
@@ -315,7 +338,7 @@ $ sudo systemctl enable --now snapper-cleanup.timer
 
 $ sudo mkdir /etc/pacman.d/hooks
 
-$ sudo micro /etc/pacman.d/hooks/50-bootbackup.hook
+$ sudo nvim /etc/pacman.d/hooks/50-bootbackup.hook
 ```
 
 Insert:
@@ -335,7 +358,7 @@ When=PreTransaction
 Exec=/usr/bin/rsync -a --delete /boot /.bootbackup
 ```
 
-## Step 20: Install yay
+## Install yay
 
 ```shell
 $ git clone https://aur.archlinux.org/yay
@@ -345,13 +368,13 @@ $ cd ..
 $ rm -rf yay
 ```
 
-## Step 21: Install snap-pac-grub & snapper-gui
+## Install snap-pac-grub & snapper-gui
 
 ```shell
 $ yay -S snap-pac-grub snapper-gui
 ```
 
-## Step 22: Reboot
+## Reboot
 
 ```shell
 $ sudo reboot
