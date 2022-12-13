@@ -236,7 +236,7 @@ $ pacman --needed -S \
   base-devel linux-headers sudo \
   bash-completion \
   btrfs-progs \
-  nvidia
+  nvidia-open
 ```
 
 network-manager-applet git openssh bluez bluez-utils cups hplip go lua
