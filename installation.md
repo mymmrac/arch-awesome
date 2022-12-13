@@ -130,6 +130,8 @@ $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@cache <disk-name>3 /mn
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@tmp <disk-name>3 /mnt/var/tmp
 
 $ mount <disk-name>1 /mnt/boot
+
+$ lsblk
 ```
 
 > `<disk-name>`: /dev/sda
