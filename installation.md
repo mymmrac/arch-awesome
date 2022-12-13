@@ -121,7 +121,7 @@ $ umount /mnt
 
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@ <disk-name>3 /mnt
 
-$ mkdir -p /mnt/{boot,home,.snapshots,var/log}
+$ mkdir -p /mnt/{boot,home,.snapshots,var/log,var/cache,var/tmp}
 
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home <disk-name>3 /mnt/home
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots <disk-name>3 /mnt/.snapshots
