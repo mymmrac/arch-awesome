@@ -139,7 +139,7 @@ $ lsblk
 ## Install base packages
 
 ```shell
-$ pacstrap /mnt base linux linux-firmware intel-ucode nvim
+$ pacstrap /mnt base linux linux-firmware intel-ucode neovim
 ```
 
 ## Generate fstab
