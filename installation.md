@@ -111,8 +111,9 @@ $ mkfs.btrfs <disk-name>3
 $ mount <disk-name>3 /mnt
 
 $ btrfs su cr /mnt/@
-$ btrfs su cr /mnt/@home
 $ btrfs su cr /mnt/@snapshots
+$ btrfs su cr /mnt/@home
+$ btrfs su cr /mnt/@home_snapshots
 $ btrfs su cr /mnt/@log
 $ btrfs su cr /mnt/@cache
 $ btrfs su cr /mnt/@tmp
@@ -121,10 +122,11 @@ $ umount /mnt
 
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@ <disk-name>3 /mnt
 
-$ mkdir -p /mnt/{boot,home,.snapshots,var/log,var/cache,var/tmp}
+$ mkdir -p /mnt/{boot,home,.snapshots,home/.snapshots,var/log,var/cache,var/tmp}
 
-$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home <disk-name>3 /mnt/home
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots <disk-name>3 /mnt/.snapshots
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home <disk-name>3 /mnt/home
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home_snapshots <disk-name>3 /mnt/home/.snapshots
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@log <disk-name>3 /mnt/var/log
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@cache <disk-name>3 /mnt/var/cache
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@tmp <disk-name>3 /mnt/var/tmp
@@ -295,8 +297,8 @@ $ sudo umount /.snapshots
 $ sudo rm -r /.snapshots
 
 $ sudo snapper -c root create-config /
-$ sudo btrfs su del /.snapshots
 
+$ sudo btrfs su del /.snapshots
 $ sudo mkdir /.snapshots
 $ sudo mount -a
 
@@ -314,7 +316,18 @@ TIMELINE_LIMIT_* => HOURLY="5" DAILY="7" WEEKLY="0" MONTHLY="0" YEARLY="0"
 ```
 
 ```shell
+$ sudo umount /home/.snapshots
+$ sudo rm -r /home/.snapshots
+
 $ sudo snapper -c home create-config /home
+
+$ sudo btrfs su del /home/.snapshots
+$ sudo mkdir /home/.snapshots
+$ sudo mount -a
+
+$ sudo chmod 750 /home/.snapshots
+$ sudo chown :mymmrac /home/.snapshots
+
 $ sudo nvim /etc/snapper/configs/home
 ```
 
@@ -326,9 +339,6 @@ TIMELINE_LIMIT_* => HOURLY="2" DAILY="7" WEEKLY="2" MONTHLY="0" YEARLY="0"
 ```
 
 ```shell
-$ sudo chmod 750 /home/.snapshots
-$ sudo chown :mymmrac /home/.snapshots
-
 $ sudo systemctl enable --now snapper-timeline.timer
 $ sudo systemctl enable --now snapper-cleanup.timer
 
