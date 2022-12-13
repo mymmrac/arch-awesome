@@ -113,7 +113,9 @@ $ mount <disk-name>3 /mnt
 $ btrfs su cr /mnt/@
 $ btrfs su cr /mnt/@home
 $ btrfs su cr /mnt/@snapshots
-$ btrfs su cr /mnt/@var_log
+$ btrfs su cr /mnt/@log
+$ btrfs su cr /mnt/@cache
+$ btrfs su cr /mnt/@tmp
 
 $ umount /mnt
 
@@ -123,7 +125,9 @@ $ mkdir -p /mnt/{boot,home,.snapshots,var/log}
 
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home <disk-name>3 /mnt/home
 $ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots <disk-name>3 /mnt/.snapshots
-$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@var_log <disk-name>3 /mnt/var/log
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@log <disk-name>3 /mnt/var/log
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@cache <disk-name>3 /mnt/var/cache
+$ mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@tmp <disk-name>3 /mnt/var/tmp
 
 $ mount <disk-name>1 /mnt/boot
 ```
