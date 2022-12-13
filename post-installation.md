@@ -3,6 +3,14 @@
 ## Step 1: Install packages
 
 ```shell
+$ git clone https://aur.archlinux.org/yay
+$ cd yay
+$ makepkg -si
+$ cd ..
+$ rm -rf yay
+```
+
+```shell
 $ sudo micro /etc/pacman.conf
 ```
 
@@ -41,7 +49,8 @@ $ sudo pacman --needed -S \
 $ yay -S \
   optimus-manager optimus-manager-qt \
   noisetorch zoom spotify jetbrains-toolbox teams minecraft-launcher \
-  paper-icon-theme-git
+  paper-icon-theme-git \
+  snap-pac-grub snapper-gui
 ```
 
 ## Step 2: Configure touchpad
