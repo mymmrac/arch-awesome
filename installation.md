@@ -239,10 +239,6 @@ $ pacman --needed -S \
   nvidia-open
 ```
 
-network-manager-applet git openssh bluez bluez-utils cups hplip go lua
-
-wpa_supplicant
-
 ## Add modules
 
 ```shell
@@ -271,9 +267,6 @@ $ grub-mkconfig -o /boot/grub/grub.cfg
 
 ```shell
 $ systemctl enable NetworkManager
-$ systemctl enable bluetooth
-$ systemctl enable cups
-$ systemctl enable sshd
 ```
 
 ## Create user
