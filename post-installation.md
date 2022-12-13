@@ -132,6 +132,10 @@ $ fish_update_completions
 $ curl -L https://get.oh-my.fish | fish
 ```
 
+```shell
+$ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
+```
+
 ## Step 6: Enable services
 
 ```shell
