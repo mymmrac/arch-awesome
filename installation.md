@@ -190,10 +190,6 @@ LC_TELEPHONE=uk_UA.UTF-8
 LC_TIME=uk_UA.UTF-8
 ```
 
-```shell
-$ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
-```
-
 ## Set hostname
 
 ```shell
