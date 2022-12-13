@@ -32,7 +32,11 @@ $ sudo pacman --needed -S \
   thunar thunar-archive-plugin tumbler file-roller \
   python python-pip nodejs-lts-fermium jdk11-openjdk \
   docker docker-compose \
-  pipewire-media-session
+  pipewire-media-session \
+  network-manager-applet \
+  git openssh \
+  bluez bluez-utils cups hplip \
+  go lua
   
 $ yay -S \
   optimus-manager optimus-manager-qt \
@@ -141,6 +145,9 @@ $ localectl set-x11-keymap --no-convert us,ua pc105+inet "" grp:caps_toggle
 ```shell
 $ sudo systemctl enable lightdm
 $ sudo systemctl enable suspend@mymmrac
+$ sudo systemctl enable bluetooth
+$ sudo systemctl enable cups
+$ sudo systemctl enable sshd
 ```
 
 ## Step 7: Reboot
