@@ -165,7 +165,7 @@ $ hwclock --systohc
 $ nvim /etc/locale.gen
 ```
 
-> `<time-zone>`: Europe/Kiev
+> `<time-zone>`: Europe/Kyiv
 
 Uncomment `en_US.UTF-8 UTF-8` and `uk_UA.UTF-8 UTF-8`
 
