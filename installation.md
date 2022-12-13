@@ -84,6 +84,8 @@ $ gdisk <disk-name>
 > 3
 > Xi
 
+> p
+
 > w
 ```
 
