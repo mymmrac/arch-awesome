@@ -225,24 +225,23 @@ $ passwd
 ```shell
 $ pacman --needed -S \
   grub efibootmgr \
-  networkmanager network-manager-applet \
+  networkmanager \
   dialog ntp \
-  wpa_supplicant \
   mtools dosfstools \
-  git openssh \
   reflector \
   snapper rsync \
-  bluez bluez-utils \
-  cups hplip \
   xdg-utils xdg-user-dirs \
   pipewire pipewire-pulse pipewire-alsa alsa-utils \
   inetutils pkgconf \
   base-devel linux-headers sudo \
   bash-completion \
-  go lua \
   btrfs-progs \
   nvidia
 ```
+
+network-manager-applet git openssh bluez bluez-utils cups hplip go lua
+
+wpa_supplicant
 
 ## Add modules
 
