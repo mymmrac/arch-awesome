@@ -354,22 +354,6 @@ When=PreTransaction
 Exec=/usr/bin/rsync -a --delete /boot /.bootbackup
 ```
 
-## Install yay
-
-```shell
-$ git clone https://aur.archlinux.org/yay
-$ cd yay
-$ makepkg -si
-$ cd ..
-$ rm -rf yay
-```
-
-## Install snap-pac-grub & snapper-gui
-
-```shell
-$ yay -S snap-pac-grub snapper-gui
-```
-
 ## Reboot
 
 ```shell
