@@ -206,6 +206,12 @@ arch-chroot /mnt passwd "$USERNAME"
 echo -e "\n%wheel ALL=(ALL) ALL" >> /mnt/etc/sudoers
 echo
 
+# Pacman config
+sed -i "s/^#Color/Color/" /mnt/etc/pacman.conf
+sed -i "s/^#ParallelDownloads.*/ParallelDownloads = 4/" /mnt/etc/pacman.conf
+
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+
 # Install packages
 arch-chroot /mnt pacman --needed --noconfirm -S \
     grub efibootmgr \
