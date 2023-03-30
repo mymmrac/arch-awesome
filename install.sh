@@ -219,7 +219,7 @@ gum spin --spinner points --title "Updating pacman database" -- \
 # Install packages
 arch-chroot /mnt pacman --needed --noconfirm -S \
     grub efibootmgr \
-    btrfs-progs grub-btrfs \
+    btrfs-progs grub-btrfs inotify-tools \
     snapper snap-pac rsync \
     base-devel linux-headers sudo \
     mtools dosfstools \
@@ -284,6 +284,10 @@ arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootlo
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 echo
 
+# Update grub menu
+arch-chroot /mnt /etc/grub.d/41_snapshots-btrfs
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
 # Boot backup
 mkdir -p /mnt/etc/pacman.d/hooks/
 cat > /mnt/etc/pacman.d/hooks/50-bootbackup.hook << EOM
@@ -303,9 +307,10 @@ EOM
 
 # Enable services
 echo "Enable services"
+arch-chroot /mnt systemctl enable grub-btrfsd
 arch-chroot /mnt systemctl enable NetworkManager
-arch-chroot /mnt systemctl enable snapper-timeline.timer
 arch-chroot /mnt systemctl enable snapper-cleanup.timer
+arch-chroot /mnt systemctl enable snapper-timeline.timer
 echo
 
 echo "Installation done"
