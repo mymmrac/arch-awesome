@@ -158,10 +158,9 @@ echo -e "Locale gen:\n$LOCALE_GEN"
 echo
 echo "$LOCALE_GEN" > /mnt/etc/locale.gen
 
-arch-chroot /mnt locale-gen &
-sleep 4
+arch-chroot /mnt locale-gen
 
-read -r -d '' LOCALE_CONF_DEFAULT << EOM
+read -r -d '\0' LOCALE_CONF_DEFAULT << EOM
 LANG=en_US.UTF-8
 LC_ADDRESS=uk_UA.UTF-8
 LC_IDENTIFICATION=uk_UA.UTF-8
@@ -172,6 +171,7 @@ LC_NUMERIC=uk_UA.UTF-8
 LC_PAPER=uk_UA.UTF-8
 LC_TELEPHONE=uk_UA.UTF-8
 LC_TIME=uk_UA.UTF-8
+\0
 EOM
 
 LOCALE_CONF=$(echo "$LOCALE_CONF_DEFAULT" | \
@@ -211,6 +211,10 @@ sed -i "s/^#Color/Color/" /mnt/etc/pacman.conf
 sed -i "s/^#ParallelDownloads.*/ParallelDownloads = 4/" /mnt/etc/pacman.conf
 
 sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+
+gum spin --spinner points --title "Updating pacman database" -- \
+	arch-chroot /mnt pacman -Syy \
+	&& echo -e "Updated pacman database\n"
 
 # Install packages
 arch-chroot /mnt pacman --needed --noconfirm -S \
