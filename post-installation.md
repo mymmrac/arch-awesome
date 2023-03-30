@@ -47,6 +47,7 @@ $ sudo pacman --needed -S \
   go lua
   
 $ yay -S \
+  mkinitcpio-firmware \
   optimus-manager optimus-manager-qt \
   noisetorch zoom spotify jetbrains-toolbox teams minecraft-launcher \
   paper-icon-theme-git \

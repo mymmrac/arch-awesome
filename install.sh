@@ -26,7 +26,7 @@ pacman -S --noconfirm --needed gum
 echo
 
 # Update mirror list
-REFLECTOR_COUNTRIES=$(gum input --prompt "Countries to search for mirrors: " --placeholder "..." --value "Ukraine,Poland")
+REFLECTOR_COUNTRIES=$(gum input --prompt "Countries to search for mirrors: " --placeholder "..." --value "Ukraine")
 echo -e "Mirror list countries: $REFLECTOR_COUNTRIES\n"
 
 gum spin --spinner points --title "Running reflector" -- \
@@ -56,17 +56,17 @@ if gum confirm --affirmative "Automatic" --negative "Manual" "Partition method";
 
 	BOOT_PARTITION_SIZE=$(gum input --prompt "Boot partition size: " --placeholder "..." --value "+512M")
 	BOOT_PARTITION_NAME=$(gum input --prompt "Boot partition name: " --placeholder "..." --value "Alpha")
-	sgdisk -n 0:0:$BOOT_PARTITION_SIZE -t 0:ef00 -c 0:$BOOT_PARTITION_NAME "$PARTITION_DISK"
+	sgdisk -n "0:0:$BOOT_PARTITION_SIZE" -t 0:ef00 -c "0:$BOOT_PARTITION_NAME" "$PARTITION_DISK"
 	echo
 
 	SWAP_PARTITION_SIZE=$(gum input --prompt "Swap partition size: " --placeholder "..." --value "+32G")
 	SWAP_PARTITION_NAME=$(gum input --prompt "Swap partition name: " --placeholder "..." --value "Delta")
-	sgdisk -n 0:0:$SWAP_PARTITION_SIZE -t 0:8200 -c 0:$SWAP_PARTITION_NAME "$PARTITION_DISK"
+	sgdisk -n "0:0:$SWAP_PARTITION_SIZE" -t 0:8200 -c "0:$SWAP_PARTITION_NAME" "$PARTITION_DISK"
 	echo
 
 	ROOT_PARTITION_SIZE=$(gum input --prompt "Root partition size: " --placeholder "..." --value "0")
 	ROOT_PARTITION_NAME=$(gum input --prompt "Root partition name: " --placeholder "..." --value "Xi")
-	sgdisk -n 0:0:$ROOT_PARTITION_SIZE -t 0:8300 -c 0:$ROOT_PARTITION_NAME "$PARTITION_DISK"
+	sgdisk -n "0:0:$ROOT_PARTITION_SIZE" -t 0:8300 -c "0:$ROOT_PARTITION_NAME" "$PARTITION_DISK"
 	echo
 else
 	echo -e "Manual partitioning...\n"
@@ -153,14 +153,15 @@ arch-chroot /mnt hwclock --systohc
 
 # Set locale
 LOCALE_GEN=$(echo -e "en_US.UTF-8 UTF-8\nuk_UA.UTF-8 UTF-8" | \
-	gum write --header "Locales to generate (ESC or Ctrl+D to confirm)" --placeholder "..." --height 4 --show-line-numbers --prompt "|")
+	gum write --header "Locales to generate (Ctrl+D to confirm)" --placeholder "..." --height 4 --show-line-numbers --prompt "|")
 echo -e "Locale gen:\n$LOCALE_GEN"
 echo
 echo "$LOCALE_GEN" > /mnt/etc/locale.gen
 
-arch-chroot /mnt locale-gen
+arch-chroot /mnt locale-gen &
+sleep 4
 
-LOCALE_CONF=$(echo << EOF
+read -r -d '' LOCALE_CONF_DEFAULT << EOM
 LANG=en_US.UTF-8
 LC_ADDRESS=uk_UA.UTF-8
 LC_IDENTIFICATION=uk_UA.UTF-8
@@ -171,8 +172,10 @@ LC_NUMERIC=uk_UA.UTF-8
 LC_PAPER=uk_UA.UTF-8
 LC_TELEPHONE=uk_UA.UTF-8
 LC_TIME=uk_UA.UTF-8
-EOF | \
-	gum write --header "Locales to use (ESC or Ctrl+D to confirm)" --placeholder "..." --height 8 --show-line-numbers --prompt "|")
+EOM
+
+LOCALE_CONF=$(echo "$LOCALE_CONF_DEFAULT" | \
+	gum write --header "Locales to use (Ctrl+D to confirm)" --placeholder "..." --height 8 --show-line-numbers --prompt "|")
 echo -e "Locale conf:\n$LOCALE_CONF"
 echo
 echo "$LOCALE_CONF" > /mnt/etc/locale.conf
@@ -182,11 +185,12 @@ HOSTNAME=$(gum input --prompt "Hostname: " --placeholder "..." --value "mymmrac-
 echo -e "Hostname: $HOSTNAME"
 
 echo "$HOSTNAME" > /mnt/etc/hostname
-echo << EOF
+cat > /mnt/etc/hosts << EOM
 127.0.0.1 localhost
 ::1       localhost
 127.0.1.1 $HOSTNAME.localdomain    $HOSTNAME
-EOF > /mnt/etc/hosts
+EOM
+echo
 
 # Set root password
 arch-chroot /mnt passwd
@@ -199,28 +203,27 @@ echo
 
 arch-chroot /mnt useradd -mG wheel "$USERNAME"
 arch-chroot /mnt passwd "$USERNAME"
-arch-chroot /mnt echo "%wheel ALL=(ALL) ALL" | (EDITOR="tee -a" visudo)
+echo -e "\n%wheel ALL=(ALL) ALL" >> /mnt/etc/sudoers
 echo
 
 # Install packages
-arch-chroot /mnt pacman --needed -S \
+arch-chroot /mnt pacman --needed --noconfirm -S \
     grub efibootmgr \
     networkmanager \
     dialog ntp \
     mtools dosfstools \
     reflector \
-    snapper rsync \
+    snapper snap-pac rsync \
     xdg-utils xdg-user-dirs \
     inetutils pkgconf \
     base-devel linux-headers sudo \
     bash-completion \
     btrfs-progs grub-btrfs \
-	nvidia-open
+	  nvidia-open
 
 # Update modules
 sed -i "s/^MODULES=()/MODULES=(btrfs i915 nvidia)/" /mnt/etc/mkinitcpio.conf
-# TODO: Validate
-sed -i "s/^HOOKS=(\([\w ]*\)\bfsck\b\([\w ]*\))/HOOKS=(\1 \2)/" /mnt/etc/mkinitcpio.conf
+sed -i "s/^HOOKS=(\([a-zA-Z0-9_ ]\+\) fsck \([a-zA-Z0-9_ ]\+\))/HOOKS=(\1 \2 fsck grub-btrfs-overlayfs)/" /mnt/etc/mkinitcpio.conf
 
 arch-chroot /mnt mkinitcpio -p linux
 echo
@@ -231,11 +234,49 @@ arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootlo
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 echo
 
-# Configure snapper
-# TODO
+# Configure snapper root
+umount /mnt/.snapshots
+rm -r /mnt/.snapshots
+
+arch-chroot /mnt snapper --no-dbus -c root create-config /
+
+arch-chroot /mnt btrfs su del /.snapshots
+mkdir /mnt/.snapshots
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots "$ROOT_PARTITION" /mnt/.snapshots
+
+arch-chroot /mnt chmod 750 /.snapshots
+arch-chroot /mnt chown :mymmrac /.snapshots
+
+sed -i "s/^ALLOW_USERS=\"\"/ALLOW_USERS=\"$USERNAME\"/" /mnt/etc/snapper/configs/root
+sed -i "s/^TIMELINE_LIMIT_HOURLY=.*/TIMELINE_LIMIT_HOURLY=\"8\"/" /mnt/etc/snapper/configs/root
+sed -i "s/^TIMELINE_LIMIT_DAILY=.*/TIMELINE_LIMIT_DAILY=\"7\"/" /mnt/etc/snapper/configs/root
+sed -i "s/^TIMELINE_LIMIT_WEEKLY=.*/TIMELINE_LIMIT_WEEKLY=\"4\"/" /mnt/etc/snapper/configs/root
+sed -i "s/^TIMELINE_LIMIT_MONTHLY=.*/TIMELINE_LIMIT_MONTHLY=\"2\"/" /mnt/etc/snapper/configs/root
+sed -i "s/^TIMELINE_LIMIT_YEARLY=.*/TIMELINE_LIMIT_YEARLY=\"0\"/" /mnt/etc/snapper/configs/root
+
+# Configure snapper home
+umount /mnt/home/.snapshots
+rm -r /mnt/home/.snapshots
+
+arch-chroot /mnt snapper --no-dbus -c home create-config /home
+
+arch-chroot /mnt btrfs su del /home/.snapshots
+mkdir /mnt/home/.snapshots
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots "$ROOT_PARTITION" /mnt/home/.snapshots
+
+arch-chroot /mnt chmod 750 /home/.snapshots
+arch-chroot /mnt chown :mymmrac /home/.snapshots
+
+sed -i "s/^ALLOW_USERS=\"\"/ALLOW_USERS=\"$USERNAME\"/" /mnt/etc/snapper/configs/home
+sed -i "s/^TIMELINE_LIMIT_HOURLY=.*/TIMELINE_LIMIT_HOURLY=\"4\"/" /mnt/etc/snapper/configs/home
+sed -i "s/^TIMELINE_LIMIT_DAILY=.*/TIMELINE_LIMIT_DAILY=\"7\"/" /mnt/etc/snapper/configs/home
+sed -i "s/^TIMELINE_LIMIT_WEEKLY=.*/TIMELINE_LIMIT_WEEKLY=\"2\"/" /mnt/etc/snapper/configs/home
+sed -i "s/^TIMELINE_LIMIT_MONTHLY=.*/TIMELINE_LIMIT_MONTHLY=\"1\"/" /mnt/etc/snapper/configs/home
+sed -i "s/^TIMELINE_LIMIT_YEARLY=.*/TIMELINE_LIMIT_YEARLY=\"0\"/" /mnt/etc/snapper/configs/home
 
 # Boot backup
-echo << EOF
+mkdir -p /mnt/etc/pacman.d/hooks/
+cat > /mnt/etc/pacman.d/hooks/50-bootbackup.hook << EOM
 [Trigger]
 Operation=Upgrade
 Operation=Install
@@ -248,7 +289,7 @@ Depends=rsync
 Description=Backing up /boot...
 When=PreTransaction
 Exec=/usr/bin/rsync -a --delete /boot /.bootbackup
-EOF > /mnt/etc/pacman.d/hooks/50-bootbackup.hook
+EOM
 
 # Enable services
 echo "Enable services"
@@ -257,3 +298,4 @@ arch-chroot /mnt systemctl enable snapper-timeline.timer
 arch-chroot /mnt systemctl enable snapper-cleanup.timer
 echo
 
+echo "Installation done"
