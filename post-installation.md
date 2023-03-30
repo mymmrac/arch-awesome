@@ -25,7 +25,7 @@ Include = /etc/pacman.d/mirrorlist
 $ sudo pacman -Syyu
 
 $ sudo pacman --needed -S \
-  mesa xf86-video-intel nvidia nvidia-utils nvidia-settings \
+  mesa xf86-video-intel nvidia-utils nvidia-settings \
   xorg-server xorg-xrandr xorg-xkill xorg-xinit xorg-xhost \
   terminus-font ttf-dejavu noto-fonts ttf-liberation ttf-ibm-plex \
   libinput unclutter man-db make m4 libvncserver libtool libpulse gettext gcc autoconf automake file fakeroot \
@@ -42,7 +42,7 @@ $ sudo pacman --needed -S \
   docker docker-compose \
   pipewire-media-session \
   network-manager-applet \
-  git openssh \
+  openssh \
   bluez bluez-utils cups hplip \
   go lua
   

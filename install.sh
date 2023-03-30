@@ -209,16 +209,16 @@ echo
 # Install packages
 arch-chroot /mnt pacman --needed --noconfirm -S \
     grub efibootmgr \
+    btrfs-progs grub-btrfs \
+    snapper snap-pac rsync \
+    base-devel linux-headers sudo \
+    mtools dosfstools \
     networkmanager \
     dialog ntp \
-    mtools dosfstools \
-    reflector \
-    snapper snap-pac rsync \
+    reflector git \
     xdg-utils xdg-user-dirs \
     inetutils pkgconf \
-    base-devel linux-headers sudo \
     bash-completion \
-    btrfs-progs grub-btrfs \
 	  nvidia-open
 
 # Update modules
@@ -226,12 +226,6 @@ sed -i "s/^MODULES=()/MODULES=(btrfs i915 nvidia)/" /mnt/etc/mkinitcpio.conf
 sed -i "s/^HOOKS=(\([a-zA-Z0-9_ ]\+\) fsck \([a-zA-Z0-9_ ]\+\))/HOOKS=(\1 \2 fsck grub-btrfs-overlayfs)/" /mnt/etc/mkinitcpio.conf
 
 arch-chroot /mnt mkinitcpio -p linux
-echo
-
-# Install GRUB
-echo "Install GRUB"
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 echo
 
 # Configure snapper root
@@ -273,6 +267,12 @@ sed -i "s/^TIMELINE_LIMIT_DAILY=.*/TIMELINE_LIMIT_DAILY=\"7\"/" /mnt/etc/snapper
 sed -i "s/^TIMELINE_LIMIT_WEEKLY=.*/TIMELINE_LIMIT_WEEKLY=\"2\"/" /mnt/etc/snapper/configs/home
 sed -i "s/^TIMELINE_LIMIT_MONTHLY=.*/TIMELINE_LIMIT_MONTHLY=\"1\"/" /mnt/etc/snapper/configs/home
 sed -i "s/^TIMELINE_LIMIT_YEARLY=.*/TIMELINE_LIMIT_YEARLY=\"0\"/" /mnt/etc/snapper/configs/home
+
+# Install GRUB
+echo "Install GRUB"
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+echo
 
 # Boot backup
 mkdir -p /mnt/etc/pacman.d/hooks/
