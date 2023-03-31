@@ -11,21 +11,10 @@ $ rm -rf yay
 ```
 
 ```shell
-$ sudo micro /etc/pacman.conf
-```
-
-Uncomment:
-
-```
-[multilib]
-Include = /etc/pacman.d/mirrorlist
-```
-
-```shell
 $ sudo pacman -Syyu
 
 $ sudo pacman --needed -S \
-  mesa xf86-video-intel nvidia-utils nvidia-settings \
+  mesa xf86-video-intel nvidia-open nvidia-utils nvidia-settings \
   xorg-server xorg-xrandr xorg-xkill xorg-xinit xorg-xhost \
   terminus-font ttf-dejavu noto-fonts ttf-liberation ttf-ibm-plex \
   libinput unclutter man-db make m4 libvncserver libtool libpulse gettext gcc autoconf automake file fakeroot \
@@ -88,25 +77,6 @@ IdleActionSec=15min
 ```
 
 ## Step 4: Copy configs
-
-```shell
-$ micro .bashrc
-```
-
-Append:
-
-```shell
-if [[ $(ps --no-header --pid=$PPID --format=cmd) != "fish" && -z ${BASH_EXECUTION_STRING} ]]
-then
-  exec fish
-fi
-
-alias la='ls -a'
-alias ftime='date +"%d.%m.%y    %T" | figlet -tk | lolcat'
-
-eval "$(starship init bash)"
-ftime
-```
 
 ```shell
 $ sudo micro /etc/systemd/system/suspend\@.service

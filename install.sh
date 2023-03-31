@@ -228,8 +228,7 @@ arch-chroot /mnt pacman --needed --noconfirm -S \
     reflector git \
     xdg-utils xdg-user-dirs \
     inetutils pkgconf \
-    bash-completion \
-	  nvidia-open
+    bash-completion
 
 # Update modules
 sed -i "s/^MODULES=()/MODULES=(btrfs i915 nvidia)/" /mnt/etc/mkinitcpio.conf
